@@ -22,5 +22,6 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 15)
     private String password;
 
+    private String username;
     private String refreshToken;
 }

@@ -26,9 +26,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        // 로그인, 인증 엔드포인트와 OCR 업로드는 필터 건너뜀
-        return path.startsWith("/user/login")
-                || path.startsWith("/user/ocr");
+        // 로그인, 회원가입, 액세스 토큰 재발급은 필터 건너뜀
+        return  path.startsWith("/user/login") ||
+                path.startsWith("/user/signup") ||
+                path.startsWith("/user/refresh");
     }
 
     @Override

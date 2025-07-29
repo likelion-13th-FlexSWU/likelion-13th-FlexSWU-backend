@@ -26,11 +26,11 @@ spring:
       - database
       - local
 
-
 #frontend:
 #  domain: ${FRONT_DOMAIN}
 #
 
-
 jwt:
   secret: ${JWT_SECRET}
+  access-exp-time: 3600000         # 1시간 (1000ms * 60 * 60)
+  refresh-exp-time: 604800000      # 7일 (1000ms * 60 * 60 * 24 * 7)

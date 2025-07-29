@@ -38,11 +38,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        //Bearer 필수
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
+            //토큰 유효성 검사 / access 토큰인지, 유효한지 만료되지 않았는지 검사
             if (jwtUtil.validateToken(token) == TokenStatus.AUTHENTICATED) {
                 String identify = jwtUtil.extractIdentify(token);
                 User user = userRepository.findByIdentify(identify).orElse(null);
+                //인증 객체 생성 + security에 사용자 인증 등록
                 if (user != null) {
                     CustomUserDetails userDetails = new CustomUserDetails(
                             user.getId(),
@@ -50,17 +53,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             user.getUsername(),
                             user.getPassword()
                     );
-
+                    //인증 객체 생성
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                    SecurityContextHolder.getContext().setAuthentication(auth);//인증 완료
                 }
             }
         }
-
+        //다음 필터로 넘김
         filterChain.doFilter(request, response);
+
     }
 
-}
 
+}

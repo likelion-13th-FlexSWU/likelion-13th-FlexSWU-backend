@@ -17,4 +17,12 @@ public class UserResponseDTO {
         Long user_id;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AccessTokenRsDTO{
+        String access_token;
+    }
+
 }

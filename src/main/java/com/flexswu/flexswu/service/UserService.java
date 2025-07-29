@@ -4,6 +4,7 @@ import com.flexswu.flexswu.dto.userDTO.UserRequestDTO;
 import com.flexswu.flexswu.dto.userDTO.UserResponseDTO;
 import com.flexswu.flexswu.entity.User;
 import com.flexswu.flexswu.jwt.JwtUtil;
+import com.flexswu.flexswu.jwt.TokenStatus;
 import com.flexswu.flexswu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,26 @@ public class UserService {
                 .refresh_token(refreshToken)
                 .user_id(user.getId())
                 .build();
+    }
+
+    //액세스 토큰 재발급
+    public TokenStatus validateRefreshToken(String token) {
+        return jwtUtil.validateRefreshToken(token);
+    }
+
+    public String extractUsernameFromRefresh(String token) {
+        return jwtUtil.extractIdentifyFromRefresh(token);
+    }
+
+    public String reissueAccessToken(String identify, String requestRefreshToken) {
+        User user = userRepository.findByIdentify(identify)
+                .orElseThrow(() -> new RuntimeException("사용자가 존재하지 않습니다."));
+
+        if (!user.getRefreshToken().equals(requestRefreshToken)) {
+            throw new RuntimeException("리프레시 토큰이 일치하지 않습니다.");
+        }
+
+        return jwtUtil.generateAccessToken(user);
     }
 
 }

@@ -56,4 +56,9 @@ public class UserController {
         return ResponseEntity.ok(new UserResponseDTO.AccessTokenRsDTO(newAccessToken));
     }
 
+    @GetMapping("/test")
+    public String test() {
+        return "test용 api";
+    }
+
 }

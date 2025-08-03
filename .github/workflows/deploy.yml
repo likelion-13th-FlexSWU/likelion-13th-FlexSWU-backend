@@ -38,7 +38,7 @@ jobs:
                   value: ${{ secrets.DEV_DB_URL }}
                 - name: GEMINI_API_KEY
                 - name: JWT_SECRET_KEY
-                  value: ${{ secrets.JWT_SECRET_KEY }}
+                  value: ${{ secrets.JWT_SECRET }}
               buildenv: []
             context:
               git:

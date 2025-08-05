@@ -29,7 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 로그인, 회원가입, 액세스 토큰 재발급은 필터 건너뜀
         return  path.startsWith("/user/login") ||
                 path.startsWith("/user/signup") ||
-                path.startsWith("/user/refresh");
+                path.startsWith("/user/refresh") ||
+                path.startsWith("/user/test");
     }
 
     @Override

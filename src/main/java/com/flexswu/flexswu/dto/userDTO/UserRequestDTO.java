@@ -40,5 +40,14 @@ public class UserRequestDTO {
         String password;
     }
 
+    //아이디 중복 확인
+    @Getter
+    public static class checkRqDTO {
+        @NotNull
+        @NotBlank
+        @Size(max = 12)
+        String identify;
+    }
+
 
 }

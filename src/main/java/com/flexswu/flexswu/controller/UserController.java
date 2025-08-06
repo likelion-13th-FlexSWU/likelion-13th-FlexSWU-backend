@@ -56,6 +56,14 @@ public class UserController {
         return ResponseEntity.ok(new UserResponseDTO.AccessTokenRsDTO(newAccessToken));
     }
 
+    //아이디 중복 확인
+    @PostMapping("/check")
+    public ResponseEntity<Boolean> checkId(
+            @RequestBody @Valid UserRequestDTO.checkRqDTO request) {
+        boolean isCheck = userRepository.findByIdentify(request.getIdentify()).isPresent();
+        return ResponseEntity.ok(isCheck);
+    }
+
     @GetMapping("/test")
     public String test() {
         return "test용 api";

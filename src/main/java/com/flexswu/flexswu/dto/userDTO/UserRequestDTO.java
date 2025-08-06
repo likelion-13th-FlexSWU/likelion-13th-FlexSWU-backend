@@ -11,26 +11,42 @@ public class UserRequestDTO {
     public static class CreateUserRqDTO{
         @NotNull
         @NotBlank
+        @Size(max = 12)
         String identify;
 
         @NotNull
         @NotBlank
-        @Size(max = 15)
+        @Size(max = 12)
         String password;
 
+        @NotNull
+        @NotBlank
+        @Size(max = 15)
         String username;
+
+        Boolean marketingAgree;
     }
     //로그인
     @Getter
     public static class LoginRqDTO{
         @NotNull
         @NotBlank
+        @Size(max = 12)
         String identify;
 
         @NotNull
         @NotBlank
-        @Size(max = 15)
+        @Size(max = 12)
         String password;
+    }
+
+    //아이디 중복 확인
+    @Getter
+    public static class checkRqDTO {
+        @NotNull
+        @NotBlank
+        @Size(max = 12)
+        String identify;
     }
 
 

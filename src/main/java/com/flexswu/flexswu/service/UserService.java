@@ -31,6 +31,7 @@ public class UserService {
                 .identify(request.getIdentify())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .username(request.getUsername())
+                .marketingAgree(request.getMarketingAgree())
                 .build();
 
         userRepository.save(user);

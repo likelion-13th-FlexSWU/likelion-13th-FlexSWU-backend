@@ -15,13 +15,16 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //length 등은 기획 나오면 추가예정
-    @Column(nullable = false, unique = true, length = 10)
+    @Column(nullable = false, unique = true, length = 12)
     private String identify;
 
     @Column(nullable = false, length = 100)
     private String password;
 
+    @Column(nullable = false, length = 15)
     private String username;
+
     private String refreshToken;
+
+    private Boolean marketingAgree;
 }

@@ -24,6 +24,16 @@ public class UserRequestDTO {
         @Size(max = 15)
         String username;
 
+        @NotNull
+        @NotBlank
+        @Size(max = 15)
+        String sido;
+
+        @NotNull
+        @NotBlank
+        @Size(max = 15)
+        String gugun;
+
         Boolean marketingAgree;
     }
     //로그인

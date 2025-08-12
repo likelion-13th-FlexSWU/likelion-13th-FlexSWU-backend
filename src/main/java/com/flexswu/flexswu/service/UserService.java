@@ -2,21 +2,25 @@ package com.flexswu.flexswu.service;
 
 import com.flexswu.flexswu.dto.userDTO.UserRequestDTO;
 import com.flexswu.flexswu.dto.userDTO.UserResponseDTO;
+import com.flexswu.flexswu.entity.RegionScore;
 import com.flexswu.flexswu.entity.User;
 import com.flexswu.flexswu.jwt.JwtUtil;
 import com.flexswu.flexswu.jwt.TokenStatus;
+import com.flexswu.flexswu.repository.RegionScoreRepository;
 import com.flexswu.flexswu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final RegionScoreRepository regionScoreRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
@@ -31,10 +35,23 @@ public class UserService {
                 .identify(request.getIdentify())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .username(request.getUsername())
+                .sido(request.getSido())
+                .gugun(request.getGugun())
+                .region_updated(LocalDate.now())
                 .marketingAgree(request.getMarketingAgree())
                 .build();
 
         userRepository.save(user);
+
+        // 지역 점수 테이블에 해당 지역 있는 지 확인 > 없으면 생성해 둠
+        regionScoreRepository.findBySidoAndGugun(request.getSido(), request.getGugun())
+                .orElseGet(() -> {
+                    RegionScore regionScore = RegionScore.builder()
+                            .sido(request.getSido())
+                            .gugun(request.getGugun())
+                            .build();
+                    return regionScoreRepository.save(regionScore);
+                });
 
     }
 

@@ -4,6 +4,8 @@ import com.flexswu.flexswu.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -27,4 +29,17 @@ public class User extends BaseEntity {
     private String refreshToken;
 
     private Boolean marketingAgree;
+
+    @Column(nullable = false, length = 15)
+    private String sido;
+
+    @Column(nullable = false, length = 15)
+    private String gugun;
+
+    @Column(nullable = false)
+    private LocalDate region_updated;
+
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int total_score = 0;
 }

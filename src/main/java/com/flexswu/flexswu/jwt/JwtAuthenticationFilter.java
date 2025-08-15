@@ -26,13 +26,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        // 로그인, 회원가입, 액세스 토큰 재발급은 필터 건너뜀
+        //
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
         return  path.startsWith("/user/login") ||
                 path.startsWith("/user/signup") ||
                 path.startsWith("/user/refresh") ||
-                path.startsWith("/user/check") ||
+                path.startsWith("/user/check")  ||
                 path.startsWith("/external/past/ping") ||
-                path.startsWith("/user/test");
+                path.startsWith("/user/test")   ||
+                path.startsWith("/swagger-ui")  ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-resources") ||
+                path.startsWith("/webjars");
     }
 
     @Override

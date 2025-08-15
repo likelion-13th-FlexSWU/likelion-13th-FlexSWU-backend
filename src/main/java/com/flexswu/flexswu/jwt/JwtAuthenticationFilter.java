@@ -31,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/user/signup") ||
                 path.startsWith("/user/refresh") ||
                 path.startsWith("/user/check") ||
+                path.startsWith("/external/past/ping") ||
                 path.startsWith("/user/test");
     }
 

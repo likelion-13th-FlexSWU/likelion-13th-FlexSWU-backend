@@ -1,7 +1,7 @@
 package com.flexswu.flexswu.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -11,10 +11,11 @@ public class PastApiService {
 
     private final RestClient pastApiRestClient;
 
-    public ResponseEntity<String> pingRoot() {
+    public String pingRootText() {
         return pastApiRestClient.get()
-                .uri("/")   // 환경변수에 설정한 base-url + "/"
+                .uri("/")                          // 외부 Past API의 루트
+                .accept(MediaType.APPLICATION_JSON) // 루트가 JSON이면 OK, text여도 String으로 수신 가능
                 .retrieve()
-                .toEntity(String.class);
+                .body(String.class);
     }
 }

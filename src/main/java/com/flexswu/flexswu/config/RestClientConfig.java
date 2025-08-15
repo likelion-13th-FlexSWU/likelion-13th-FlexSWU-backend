@@ -17,6 +17,7 @@ public class RestClientConfig {
             @Value("${past.api.base-url}") String baseUrl
     ) {
         HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1) // HTTP/1.1 강제
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 

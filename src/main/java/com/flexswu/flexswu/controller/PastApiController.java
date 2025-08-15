@@ -2,10 +2,9 @@ package com.flexswu.flexswu.controller;
 
 import com.flexswu.flexswu.service.PastApiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,6 +15,12 @@ public class PastApiController {
 
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
-        return pastApiService.pingRoot();
+        try {
+            String body = pastApiService.pingRootText(); // 서비스 통해 호출
+            return ResponseEntity.ok(body == null ? "" : body);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body("Past API 호출 실패: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
     }
 }

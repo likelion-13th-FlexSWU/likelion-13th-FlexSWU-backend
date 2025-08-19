@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 "/user/check",
                                 "/user/test",
                                 "/external/fast/ping",
+                                "/external/fast/echo",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

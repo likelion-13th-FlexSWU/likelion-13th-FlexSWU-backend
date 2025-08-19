@@ -23,4 +23,15 @@ public class FastApiController {
                     .body("Fast API 호출 실패: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
     }
+
+    @GetMapping("/echo")
+    public ResponseEntity<String> echo(@RequestParam String msg) {
+        try {
+            String body = fastApiService.echo(msg);
+            return ResponseEntity.ok(body);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body("Fast API 호출 실패: " + e.getMessage());
+        }
+    }
 }

@@ -18,4 +18,16 @@ public class FastApiService {
                 .retrieve()
                 .body(String.class);
     }
+    // Service
+    public String echo(String msg) {
+        return fastApiRestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/")
+                        .queryParam("msg", msg)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .body(String.class);
+    }
+
+
 }

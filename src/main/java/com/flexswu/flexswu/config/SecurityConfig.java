@@ -37,12 +37,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//세션 비활성화, jwt 토큰을 사용하므로 서버가 세션 만들게 x
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(//인증 제외 경로 설정
                                 "/user/login",
                                 "/user/signup",
                                 "/user/refresh",
                                 "/user/check",
-                                "user/test",
+                                "/user/test",
+                                "/external/fast/ping",
+                                "/external/fast/echo",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

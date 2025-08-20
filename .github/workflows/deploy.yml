@@ -38,6 +38,8 @@ jobs:
                   value: ${{ secrets.DEV_DB_URL }}
                 - name: JWT_SECRET
                   value: ${{ secrets.JWT_SECRET }}
+                - name: FAST_API_BASE_URL
+                  value: ${{ secrets.FAST_API_BASE_URL }}
               buildenv: []
             context:
               git:

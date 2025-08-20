@@ -9,12 +9,10 @@ import com.flexswu.flexswu.jwt.TokenStatus;
 import com.flexswu.flexswu.repository.RegionScoreRepository;
 import com.flexswu.flexswu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +35,8 @@ public class UserService {
                 .username(request.getUsername())
                 .sido(request.getSido())
                 .gugun(request.getGugun())
-                .region_updated(LocalDate.now())
-                .marketingAgree(request.getMarketingAgree())
+                .regionUpdated(LocalDate.now())
+                .marketingAgree(request.getMarketing_agree())
                 .build();
 
         userRepository.save(user);
@@ -98,6 +96,46 @@ public class UserService {
         }
 
         return jwtUtil.generateAccessToken(user);
+    }
+
+    //지역 변경
+    public String updateRegion(UserRequestDTO.regionRqDTO request, Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        LocalDate lastUpdated = user.getRegionUpdated();
+        LocalDate now = LocalDate.now();
+
+        //마지막 변경일이 있고 + 2개월이 지나지 않았으면 예외
+        if (lastUpdated.plusMonths(2).isAfter(now)) {
+            throw new IllegalArgumentException("지역 변경은 마지막 변경일로부터 2개월 후에 가능합니다.");
+        }
+
+        if(request.getSido().equals(user.getSido()) && request.getGugun().equals(user.getGugun())){
+            throw new IllegalArgumentException("현재 사용 중인 지역과 동일합니다.");
+        }
+
+        user.setSido(request.getSido());
+        user.setGugun(request.getGugun());
+        user.setRegionUpdated(now);
+        userRepository.save(user);
+
+        return "지역 변경 완료";
+    }
+
+    //닉네임 변경
+    public String updateUsername(UserRequestDTO.usernameRqDTO request, Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        if(user.getUsername().equals(request.getUsername())){
+            throw new IllegalArgumentException("현재 사용 중인 닉네임과 동일합니다.");
+        }
+
+        user.setUsername(request.getUsername());
+        userRepository.save(user);
+
+        return "닉네임 변경 완료";
     }
 
 }

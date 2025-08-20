@@ -3,15 +3,15 @@ package com.flexswu.flexswu.controller;
 import com.flexswu.flexswu.dto.userDTO.UserRequestDTO;
 import com.flexswu.flexswu.dto.userDTO.UserResponseDTO;
 import com.flexswu.flexswu.entity.User;
+import com.flexswu.flexswu.jwt.CustomUserDetails;
 import com.flexswu.flexswu.jwt.TokenStatus;
 import com.flexswu.flexswu.repository.UserRepository;
 import com.flexswu.flexswu.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
@@ -64,9 +64,19 @@ public class UserController {
         return ResponseEntity.ok(isCheck);
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "test용 api";
+    //지역 변경
+    @PatchMapping("/update/region")
+    public ResponseEntity<String> updateRegion(
+            @RequestBody @Valid UserRequestDTO.regionRqDTO request,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(userService.updateRegion(request, userDetails.getUserId()));
     }
 
+    //닉네임 변경
+    @PatchMapping("/update/nick")
+    public ResponseEntity<String> updateUsername(
+            @RequestBody @Valid UserRequestDTO.usernameRqDTO request,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(userService.updateUsername(request, userDetails.getUserId()));
+    }
 }

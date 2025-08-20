@@ -9,13 +9,25 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class FastApiService {
 
-    private final RestClient pastApiRestClient;
+    private final RestClient fastApiRestClient;
 
     public String pingRootText() {
-        return pastApiRestClient.get()
+        return fastApiRestClient.get()
                 .uri("/")                          // 외부 Past API의 루트
                 .accept(MediaType.APPLICATION_JSON) // 루트가 JSON이면 OK, text여도 String으로 수신 가능
                 .retrieve()
                 .body(String.class);
     }
+    // Service
+    public String echo(String msg) {
+        return fastApiRestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/")
+                        .queryParam("msg", msg)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .body(String.class);
+    }
+
+
 }

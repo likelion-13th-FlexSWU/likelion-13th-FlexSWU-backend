@@ -13,8 +13,8 @@ import java.time.Duration;
 public class RestClientConfig {
 
     @Bean
-    public RestClient pastApiRestClient(
-            @Value("${past.api.base-url}") String baseUrl
+    public RestClient fastApiRestClient(
+            @Value("${fast.api.base-url}") String baseUrl
     ) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1) // HTTP/1.1 강제

@@ -71,4 +71,12 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok(userService.updateRegion(request, userDetails.getUserId()));
     }
+
+    //닉네임 변경
+    @PatchMapping("/update/nick")
+    public ResponseEntity<String> updateUsername(
+            @RequestBody @Valid UserRequestDTO.usernameRqDTO request,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(userService.updateUsername(request, userDetails.getUserId()));
+    }
 }

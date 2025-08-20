@@ -9,12 +9,10 @@ import com.flexswu.flexswu.jwt.TokenStatus;
 import com.flexswu.flexswu.repository.RegionScoreRepository;
 import com.flexswu.flexswu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +36,7 @@ public class UserService {
                 .sido(request.getSido())
                 .gugun(request.getGugun())
                 .regionUpdated(LocalDate.now())
-                .marketingAgree(request.getMarketingAgree())
+                .marketingAgree(request.getMarketing_agree())
                 .build();
 
         userRepository.save(user);
@@ -123,6 +121,21 @@ public class UserService {
         userRepository.save(user);
 
         return "지역 변경 완료";
+    }
+
+    //닉네임 변경
+    public String updateUsername(UserRequestDTO.usernameRqDTO request, Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        if(user.getUsername().equals(request.getUsername())){
+            throw new IllegalArgumentException("현재 사용 중인 닉네임과 동일합니다.");
+        }
+
+        user.setUsername(request.getUsername());
+        userRepository.save(user);
+
+        return "닉네임 변경 완료";
     }
 
 }

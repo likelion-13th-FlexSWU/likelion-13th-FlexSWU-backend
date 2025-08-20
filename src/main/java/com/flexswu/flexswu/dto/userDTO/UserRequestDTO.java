@@ -1,7 +1,6 @@
 package com.flexswu.flexswu.dto.userDTO;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
@@ -29,7 +28,7 @@ public class UserRequestDTO {
         @Size(max = 15)
         String gugun;
 
-        Boolean marketingAgree;
+        Boolean marketing_agree;
     }
     //로그인
     @Getter
@@ -55,10 +54,20 @@ public class UserRequestDTO {
     @Getter
     public static class regionRqDTO {
         @NotBlank
+        @Size(max = 15)
         String sido;
 
         @NotBlank
+        @Size(max = 15)
         String gugun;
+    }
+
+    //닉네임 변경
+    @Getter
+    public static class usernameRqDTO {
+        @NotBlank
+        @Size(max = 15)
+        String username;
     }
 
 }

@@ -37,7 +37,7 @@ public class User extends BaseEntity {
     private String gugun;
 
     @Column(nullable = false)
-    private LocalDate region_updated;
+    private LocalDate regionUpdated;
 
     @Builder.Default
     @Column(nullable = false, columnDefinition = "int default 0")

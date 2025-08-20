@@ -16,8 +16,8 @@ public class FastApiController {
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
         try {
-            String body = fastApiService.pingRootText(); // 서비스 통해 호출
-            return ResponseEntity.ok(body == null ? "" : body);
+            String body = fastApiService.callRectSweep("서울 중랑구", "카페");
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body("Fast API 호출 실패: " + e.getClass().getSimpleName() + " - " + e.getMessage());

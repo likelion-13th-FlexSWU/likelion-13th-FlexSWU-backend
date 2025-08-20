@@ -29,5 +29,21 @@ public class FastApiService {
                 .body(String.class);
     }
 
+    public String callRectSweep(String query, String keyword) {
+        return fastApiRestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/rect-sweep")
+                        .queryParam("query", query)
+                        .queryParam("keyword", keyword)
+                        .queryParam("total_limit", 200)
+                        .queryParam("span_m", 20000)
+                        .queryParam("step_m", 4000)
+                        .queryParam("concurrency", 8)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .body(String.class);
+    }
+
 
 }

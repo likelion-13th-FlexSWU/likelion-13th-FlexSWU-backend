@@ -7,7 +7,7 @@ import org.springframework.web.client.RestClient;
 
 @Service
 @RequiredArgsConstructor
-public class PastApiService {
+public class FastApiService {
 
     private final RestClient pastApiRestClient;
 

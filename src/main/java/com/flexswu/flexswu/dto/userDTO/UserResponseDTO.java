@@ -12,9 +12,9 @@ public class UserResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserResultRsDTO{
-        String access_token;
-        String refresh_token;
-        Long user_id;
+        private String access_token;
+        private String refresh_token;
+        private Long user_id;
     }
 
     @Builder
@@ -22,7 +22,7 @@ public class UserResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AccessTokenRsDTO{
-        String access_token;
+        private String access_token;
     }
 
 }

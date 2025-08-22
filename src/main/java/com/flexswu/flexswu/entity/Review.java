@@ -28,7 +28,6 @@ public class Review extends BaseEntity {
     private User user;
 
     private String placeName;
-    private String title;
 
     // 내용 (nullable 허용)
     @Column(columnDefinition = "TEXT")

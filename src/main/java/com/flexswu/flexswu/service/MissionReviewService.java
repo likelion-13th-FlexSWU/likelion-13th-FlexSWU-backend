@@ -65,7 +65,6 @@ public class MissionReviewService {
                 .missionId(req.getMission_id())
                 .user(user)
                 .placeName(req.getPlaceName())
-                .title(req.getTitle())
                 .content(req.getContent()) // content는 null 가능
                 .visitedAt(visited)
                 .build();
@@ -85,7 +84,6 @@ public class MissionReviewService {
                 ReviewItemDTO.builder()
                         .reviewid(String.valueOf(r.getId()))
                         .placeName(r.getPlaceName())
-                        .title(r.getTitle())
                         .content(r.getContent())
                         // 응답: [{"code":"1"},{"code":"2"}] 형식
                         .tags(r.getTagCodes().stream()

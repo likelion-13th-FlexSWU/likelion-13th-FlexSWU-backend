@@ -41,7 +41,7 @@ public class User extends BaseEntity {
 
     @Builder.Default
     @Column(nullable = false, columnDefinition = "int default 0")
-    private int total_score = 0;
+    private int totalScore = 0;
 
     @Column(nullable = true, length = 15)
     private String userType;

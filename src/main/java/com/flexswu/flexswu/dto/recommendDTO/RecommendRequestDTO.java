@@ -10,7 +10,7 @@ import lombok.Getter;
 import java.util.List;
 
 public class RecommendRequestDTO {
-    //추천 받기 http요청용
+    //추천 받기 http 요청용 (조회용)
     @Getter
     @Builder
     public static class RecommendRqDTO{
@@ -35,4 +35,36 @@ public class RecommendRequestDTO {
         private String place_category;
         private String search_query;
     }
+
+    //추천 받기 (최종 저장용)
+    @Getter
+    @Builder
+    public static class RecommendRqFinalSaveDTO {
+        @NotEmpty
+        private List<String> place_mood;
+
+        @NotBlank
+        private String category;
+
+        @NotEmpty
+        private List<RecommendStoreDTO> stores;
+
+        @Getter
+        @Builder
+        public static class RecommendStoreDTO {
+            @NotBlank
+            private String name;
+
+            @NotBlank
+            private String address_road;
+
+            private String address_ex;
+
+            private String phone;
+
+            @NotBlank
+            private String url;
+        }
+    }
+
 }

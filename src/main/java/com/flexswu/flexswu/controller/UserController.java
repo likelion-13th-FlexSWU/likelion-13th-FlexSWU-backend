@@ -1,11 +1,14 @@
 package com.flexswu.flexswu.controller;
 
+import com.flexswu.flexswu.dto.userDTO.UserClusterResponseDTO;
+import com.flexswu.flexswu.dto.userDTO.UserPreferenceUpdateDTO;
 import com.flexswu.flexswu.dto.userDTO.UserRequestDTO;
 import com.flexswu.flexswu.dto.userDTO.UserResponseDTO;
 import com.flexswu.flexswu.entity.User;
 import com.flexswu.flexswu.jwt.CustomUserDetails;
 import com.flexswu.flexswu.jwt.TokenStatus;
 import com.flexswu.flexswu.repository.UserRepository;
+import com.flexswu.flexswu.service.UserPreferenceService;
 import com.flexswu.flexswu.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +16,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipal;
+import java.security.Principal;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserRepository userRepository;
     private final UserService userService;
+    private final UserPreferenceService userPreferenceService;
 
     //회원가입
     @PostMapping("/signup")
@@ -62,6 +70,42 @@ public class UserController {
             @RequestBody @Valid UserRequestDTO.checkRqDTO request) {
         boolean isCheck = userRepository.findByIdentify(request.getIdentify()).isPresent();
         return ResponseEntity.ok(isCheck);
+    }
+
+    // 사용자가 선택한 가게 분위기 카테고리를 받아 누적 카운트 업데이트
+    @PostMapping("/preferences")
+    public ResponseEntity<Integer> updateUserPreferences(Principal principal,
+                                                         @RequestBody UserPreferenceUpdateDTO updateDto) {
+        String identify = principal.getName();
+        User user = userRepository.findByIdentify(identify)
+                .orElseThrow(() -> new RuntimeException("User not found with identify: " + identify));
+        Long userId = user.getId();
+
+        int surveyCount = userPreferenceService.updateUserPreference(userId, updateDto);
+        return ResponseEntity.ok(surveyCount);
+    }
+
+    // 사용자 유형(타입)을 AI 모델을 통해 분석하여 반환
+    @GetMapping("/type")
+    public ResponseEntity<UserClusterResponseDTO> getMyType(Principal principal) {
+        String identify = principal.getName();
+        User user = userRepository.findByIdentify(identify)
+                .orElseThrow(() -> new RuntimeException("User not found with identify: " + identify));
+        Long userId = user.getId();
+
+        UserClusterResponseDTO userType = userPreferenceService.getUserType(userId);
+        return ResponseEntity.ok(userType);
+    }
+
+    // 전체 사용자 데이터를 기반으로 AI 모델 재학습 요청
+    @PostMapping("/admin/train-model")
+    public ResponseEntity<String> trainModel() {
+        try {
+            userPreferenceService.trainAiModel();
+            return ResponseEntity.ok("AI model training has been successfully requested.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("모델링 시작 실패: " + e.getMessage());
+        }
     }
 
     //지역 변경

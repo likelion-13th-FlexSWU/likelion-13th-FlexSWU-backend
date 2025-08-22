@@ -33,12 +33,15 @@ public class RecommendController {
 
     //추천 받기 (최종 저장용)
     @PostMapping("/save")
-    public ResponseEntity<Void> recommendSave(
+    public ResponseEntity<Integer> recommendSave(
             @RequestBody @Valid RecommendRequestDTO.RecommendRqFinalSaveDTO request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        recommendService.finalSave(request, userDetails.getUserId());
-        return ResponseEntity.ok().build();
+        // service 계층에서 반환된 누적 설문 횟수를 변수에 저장
+        int surveyCount = recommendService.finalSave(request, userDetails.getUserId());
+
+        // surveyCount 값을 응답 본문에 담아 200 OK 상태로 반환
+        return ResponseEntity.ok(surveyCount);
     }
 
 }

@@ -2,10 +2,12 @@ package com.flexswu.flexswu.service;
 
 import com.flexswu.flexswu.dto.recommendDTO.RecommendRequestDTO;
 import com.flexswu.flexswu.dto.recommendDTO.RecommendResponseDTO;
+import com.flexswu.flexswu.dto.userDTO.UserPreferenceUpdateDTO;
 import com.flexswu.flexswu.entity.Recommend;
 import com.flexswu.flexswu.entity.User;
 import com.flexswu.flexswu.repository.RecommendRepository;
 import com.flexswu.flexswu.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,7 @@ public class RecommendService {
     private final UserRepository userRepository;
     private final RecommendRepository recommendRepository;
     private final FastApiService fastApiService;
+    private final UserPreferenceService userPreferenceService;
 
     //추천 받기 (조회용)
     public RecommendResponseDTO.RecommendFullResponseDTO recommendToday(RecommendRequestDTO.RecommendRqDTO request, Long userId) {
@@ -80,7 +83,8 @@ public class RecommendService {
     }
 
     //추천 받기 (최종저장용)
-    public void finalSave(RecommendRequestDTO.RecommendRqFinalSaveDTO request, Long userId) {
+    @Transactional
+    public int finalSave(RecommendRequestDTO.RecommendRqFinalSaveDTO request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
@@ -102,5 +106,20 @@ public class RecommendService {
                 .toList();
 
         recommendRepository.saveAll(toSave);
+
+        UserPreferenceUpdateDTO preferenceUpdateDTO = new UserPreferenceUpdateDTO();
+        preferenceUpdateDTO.setSelectedCategories(request.getPlace_mood());
+
+        // 1. userPreferenceService를 호출하고, 반환된 설문 횟수를 변수에 저장
+        int surveyCount = userPreferenceService.updateUserPreference(userId, preferenceUpdateDTO);
+
+        // 2. 설문 횟수가 10 이상인지 확인
+        if (surveyCount >= 10) {
+            // 3. 10 이상이면 사용자 유형 분석 로직을 호출
+            userPreferenceService.getUserType(userId);
+        }
+
+        // 4. 설문 횟수를 컨트롤러로 반환
+        return surveyCount;
     }
 }

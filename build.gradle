@@ -45,6 +45,9 @@ dependencies {
 
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// 데이터베이스 드라이버
+	runtimeOnly 'org.postgresql:postgresql'
 }
 
 tasks.named('test') {

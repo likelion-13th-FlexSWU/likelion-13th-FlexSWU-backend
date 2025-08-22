@@ -52,6 +52,19 @@ public class FastApiService {
                 .retrieve() // 5. 요청 실행 및 응답 수신
                 .body(UserClusterResponseDTO.class); // 6. 응답 Body를 DTO로 변환
     }
+
+    // FastAPI 서버로 전체 사용자 데이터 보내 모델 재학습 요청
+    public void requestModelTraining(List<UserBehaviorDataDTO> allUsersData) {
+        String url = fastapiUrl + "/model/train";
+
+        fastApiRestClient.post()
+                .uri(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(allUsersData)
+                .retrieve()
+                .toBodilessEntity(); // 7. 응답 Body가 없거나 무시할 경우
+    }
+
     // 추천 받기 api 호출
     public List<RecommendResponseDTO.RecommendFastDTO> getRecommendations(
             RecommendRequestDTO.RecommendFastDTO body
@@ -65,18 +78,5 @@ public class FastApiService {
                 .body(RecommendResponseDTO.RecommendListDTO.class);
 
         return wrapper != null ? wrapper.getRecommendations() : List.of();
-    }
-
-
-    // FastAPI 서버로 전체 사용자 데이터 보내 모델 재학습 요청
-    public void requestModelTraining(List<UserBehaviorDataDTO> allUsersData) {
-        String url = fastapiUrl + "/model/train";
-
-        fastApiRestClient.post()
-                .uri(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(allUsersData)
-                .retrieve()
-                .toBodilessEntity(); // 7. 응답 Body가 없거나 무시할 경우
     }
 }

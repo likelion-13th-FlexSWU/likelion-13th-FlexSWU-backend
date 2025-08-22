@@ -20,7 +20,7 @@ public class RecommendService {
     private final FastApiService fastApiService;
 
     //추천 받기
-    public List<RecommendResponseDTO.RecommendFastDTO> recommendToday(RecommendRequestDTO.RecommendRqDTO request, Long userId){
+    public RecommendResponseDTO.RecommendFullResponseDTO recommendToday(RecommendRequestDTO.RecommendRqDTO request, Long userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
@@ -37,38 +37,35 @@ public class RecommendService {
 //            throw new IllegalArgumentException("본인 지역 x");
 //        }
 
-        // HTTP DTO -> FastAPI DTO 변환
+        // HTTP 요청 DTO -> FastAPI 요청 DTO 변환
         RecommendRequestDTO.RecommendFastDTO fastBody = toFastApiBody(request, user);
 
-        // fastAPI 호출
-        List<RecommendResponseDTO.RecommendFastDTO> rawList = fastApiService.getRecommendations(fastBody);
+        // fastAPI 호출해서 추천 리스트 받아옴
+        List<RecommendResponseDTO.RecommendFastDTO> stores = fastApiService.getRecommendations(fastBody);
 
-        // fastapi 응답 -> 우리 응답 DTO 변환
-        return rawList.stream()
-                .map(this::toRsDTO)
-                .toList();
+        return RecommendResponseDTO.RecommendFullResponseDTO.builder()
+                .place_mood(request.getPlace_mood())
+                .category(request.getPlace_category())
+                .stores(stores)
+                .build();
     }
 
     /** HTTP 요청 DTO -> FastAPI DTO 변환 */
     private RecommendRequestDTO.RecommendFastDTO toFastApiBody(
             RecommendRequestDTO.RecommendRqDTO rq, User user
-    ) {
-        String regionJoin = String.join(" ", rq.getRegion());
-        String searchQuery = user.getSido() + " " + regionJoin;
+                ) {
+            String regionJoin = String.join(" ", rq.getRegion()); //ex 노원구 공릉동
+            String searchQuery = user.getSido() + " " + regionJoin; //ex 서울 노원구 공릉동
 
-        return RecommendRequestDTO.RecommendFastDTO.builder()
-                .mood_keywords(rq.getPlace_mood())
-                .place_category(rq.getPlace_category())
-                .search_query(searchQuery)
+            return RecommendRequestDTO.RecommendFastDTO.builder()
+                    .mood_keywords(rq.getPlace_mood())
+                    .place_category(rq.getPlace_category())
+                    .search_query(searchQuery)
                 .build();
     }
 
     /** FastAPI 응답 -> 우리 응답 DTO 변환 */
     private RecommendResponseDTO.RecommendFastDTO toRsDTO(RecommendResponseDTO.RecommendFastDTO fast) {
-        String address = (fast.getAddressRoad() != null && !fast.getAddressRoad().isBlank())
-                ? fast.getAddressRoad()
-                : fast.getAddressEx();
-
         return RecommendResponseDTO.RecommendFastDTO.builder()
                 .name(fast.getName())
                 .addressRoad(fast.getAddressRoad())

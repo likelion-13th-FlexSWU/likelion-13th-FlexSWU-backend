@@ -9,19 +9,31 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 public class RecommendResponseDTO {
-    //추천 받기 응답
+//    //추천 받기 응답
+//    @Builder
+//    @Getter
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    public static class RecommendRsDTO{
+//        private String category;
+//        private String name;
+//        private String address;
+//        private String phone_num;
+//        private String url;
+//    }
+
+    //최종 http 프론트 응답용 dto
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class RecommendRsDTO{
+    public static class RecommendFullResponseDTO {
+        private List<String> place_mood;
         private String category;
-        private String name;
-        private String address;
-        private String phone_num;
-        private String url;
+        private List<RecommendFastDTO> stores;
     }
 
+    //fast api 응답용 dto
     @Builder
     @Getter
     @NoArgsConstructor

@@ -41,7 +41,6 @@ public class FastApiService {
     public UserClusterResponseDTO requestUserCluster(UserBehaviorDataDTO userBehaviorData) {
         String url = fastapiUrl + "/user-cluster";
 
-        // 💡 수정된 코드
         return fastApiRestClient.post() // 1. POST 요청 시작
                 .uri(url) // 2. URI 설정
                 .contentType(MediaType.APPLICATION_JSON) // 3. Body가 JSON 타입임을 명시
@@ -54,7 +53,6 @@ public class FastApiService {
     public void requestModelTraining(List<UserBehaviorDataDTO> allUsersData) {
         String url = fastapiUrl + "/model/train";
 
-        // 💡 수정된 코드
         fastApiRestClient.post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)

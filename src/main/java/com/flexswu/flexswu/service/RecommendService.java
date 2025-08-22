@@ -26,16 +26,16 @@ public class RecommendService {
 
         //오늘 추천 받았으면 에러
         //최근 추천 기록 조회
-//        Recommend latest = recommendRepository.findTopByUserOrderByCreatedAtDesc(user);
-//
-//        //최근 추천이 있고, 생성 시간이 24시간 이내면 에러
-//        if (latest != null && latest.getCreatedAt().isAfter(LocalDateTime.now().minusHours(24))) {
-//            throw new IllegalArgumentException("오늘 이미 추천을 받았습니다.");
-//        }
-//
-//        if(!request.getRegion().contains(user.getGugun())){
-//            throw new IllegalArgumentException("본인 지역 x");
-//        }
+        Recommend latest = recommendRepository.findTopByUserOrderByCreatedAtDesc(user);
+
+        //최근 추천이 있고, 생성 시간이 24시간 이내면 에러
+        if (latest != null && latest.getCreatedAt().isAfter(LocalDateTime.now().minusHours(24))) {
+            throw new IllegalArgumentException("오늘 이미 추천을 받았습니다.");
+        }
+
+        if(!request.getRegion().contains(user.getGugun())){
+            throw new IllegalArgumentException("본인 지역 x");
+        }
 
         // HTTP 요청 DTO -> FastAPI 요청 DTO 변환
         RecommendRequestDTO.RecommendFastDTO fastBody = toFastApiBody(request, user);

@@ -11,7 +11,6 @@ import java.util.List;
 public class ReviewItemDTO {
     private String reviewid;
     private String placeName;
-    private String title;
     private String content;
     private List<TagCodeDTO> tags;
     private String visitedAt;            // "yyyy-MM-dd"

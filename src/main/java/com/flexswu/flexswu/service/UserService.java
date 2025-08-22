@@ -120,6 +120,16 @@ public class UserService {
         user.setRegionUpdated(now);
         userRepository.save(user);
 
+        // 지역 점수 테이블에 해당 지역 있는 지 확인 > 없으면 생성해 둠
+        regionScoreRepository.findBySidoAndGugun(request.getSido(), request.getGugun())
+                .orElseGet(() -> {
+                    RegionScore regionScore = RegionScore.builder()
+                            .sido(request.getSido())
+                            .gugun(request.getGugun())
+                            .build();
+                    return regionScoreRepository.save(regionScore);
+                });
+
         return "지역 변경 완료";
     }
 

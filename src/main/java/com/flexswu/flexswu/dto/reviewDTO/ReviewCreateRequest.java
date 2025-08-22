@@ -19,7 +19,6 @@ public class ReviewCreateRequest {
     // nullable 허용
     private String content;
 
-    // 선택 필드(있으면 저장)
     private String placeName;
     private String title;
     private String visitedAt; // "yyyy-MM-dd"

@@ -61,9 +61,12 @@ public class RecommendService {
         String regionJoin = String.join(" ", rq.getRegion()); //ex 노원구 공릉동
         String searchQuery = user.getSido() + " " + regionJoin; //ex 서울 노원구 공릉동
 
+        //장소 카테고리 카카오 맵 키워드 검색 기준으로 변환
+        String convertedCategory = convertCategory(rq.getPlace_category());
+
         return RecommendRequestDTO.RecommendFastDTO.builder()
                 .mood_keywords(rq.getPlace_mood())
-                .place_category(rq.getPlace_category())
+                .place_category(convertedCategory)
                 .search_query(searchQuery)
                 .build();
     }
@@ -104,5 +107,23 @@ public class RecommendService {
                 .toList();
 
         recommendRepository.saveAll(toSave);
+    }
+
+    //카테고리 매핑
+    private String convertCategory(String category) {
+        return switch (category) {
+            case "한식당" -> "한식";
+            case "일식당" -> "일식";
+            case "중식당" -> "중식";
+            case "양식집" -> "양식";
+            case "분식집" -> "분식";
+            case "커피 전문점" -> "카페";
+            case "호프집" -> "술집";
+            case "일본식 주점" -> "이자카야";
+            case "제과점, 베이커리" -> "빵";
+            case "아이스크림 가게" -> "아이스크림";
+            case "소품샵" -> "디자인문구";
+            default -> throw new IllegalArgumentException("정의되지 않은 카테고리");
+        };
     }
 }

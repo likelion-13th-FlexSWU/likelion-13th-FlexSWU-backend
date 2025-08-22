@@ -19,8 +19,8 @@ public class RecommendService {
     private final RecommendRepository recommendRepository;
     private final FastApiService fastApiService;
 
-    //추천 받기
-    public RecommendResponseDTO.RecommendFullResponseDTO recommendToday(RecommendRequestDTO.RecommendRqDTO request, Long userId){
+    //추천 받기 (조회용)
+    public RecommendResponseDTO.RecommendFullResponseDTO recommendToday(RecommendRequestDTO.RecommendRqDTO request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
@@ -50,21 +50,25 @@ public class RecommendService {
                 .build();
     }
 
-    /** HTTP 요청 DTO -> FastAPI DTO 변환 */
+    /**
+     * HTTP 요청 DTO -> FastAPI DTO 변환
+     */
     private RecommendRequestDTO.RecommendFastDTO toFastApiBody(
             RecommendRequestDTO.RecommendRqDTO rq, User user
-                ) {
-            String regionJoin = String.join(" ", rq.getRegion()); //ex 노원구 공릉동
-            String searchQuery = user.getSido() + " " + regionJoin; //ex 서울 노원구 공릉동
+    ) {
+        String regionJoin = String.join(" ", rq.getRegion()); //ex 노원구 공릉동
+        String searchQuery = user.getSido() + " " + regionJoin; //ex 서울 노원구 공릉동
 
-            return RecommendRequestDTO.RecommendFastDTO.builder()
-                    .mood_keywords(rq.getPlace_mood())
-                    .place_category(rq.getPlace_category())
-                    .search_query(searchQuery)
+        return RecommendRequestDTO.RecommendFastDTO.builder()
+                .mood_keywords(rq.getPlace_mood())
+                .place_category(rq.getPlace_category())
+                .search_query(searchQuery)
                 .build();
     }
 
-    /** FastAPI 응답 -> 우리 응답 DTO 변환 */
+    /**
+     * FastAPI 응답 -> http 응답 DTO 변환
+     */
     private RecommendResponseDTO.RecommendFastDTO toRsDTO(RecommendResponseDTO.RecommendFastDTO fast) {
         return RecommendResponseDTO.RecommendFastDTO.builder()
                 .name(fast.getName())
@@ -75,4 +79,28 @@ public class RecommendService {
                 .build();
     }
 
+    //추천 받기 (최종저장용)
+    public void finalSave(RecommendRequestDTO.RecommendRqFinalSaveDTO request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        //base entity 사용 X > 수동 지정 (장소들 시각 통일을 위한)
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Recommend> toSave = request.getStores().stream()
+                .map(store -> Recommend.builder()
+                        .user(user)
+                        .name(store.getName())
+                        .category(request.getCategory())
+                        .roadAddress(store.getAddress_road())
+                        .address(store.getAddress_ex())
+                        .url(store.getUrl())
+                        .phoneNum(store.getPhone())
+                        .createdAt(now)
+                        .updatedAt(now)
+                        .build())
+                .toList();
+
+        recommendRepository.saveAll(toSave);
+    }
 }

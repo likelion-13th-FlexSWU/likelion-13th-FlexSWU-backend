@@ -64,10 +64,30 @@ public class RecommendService {
         //장소 카테고리 카카오 맵 키워드 검색 기준으로 변환
         String convertedCategory = convertCategory(rq.getPlace_category());
 
+        List<RecommendRequestDTO.PreviousPlaceDTO> previousPlaces = null;
+
+        //중복 방지용 장소 리스트 생성
+        if (!rq.getDuplicate()) {
+            Recommend latest = recommendRepository.findTopByUserOrderByCreatedAtDesc(user).orElse(null);
+            //직전 추천 존재 시 && 직전 추천 카테고리와 카테고리가 동일할 시에
+            if (latest != null && latest.getCategory().equals(rq.getPlace_category())) {
+                LocalDateTime latestTime = latest.getCreatedAt(); //추천 생성 시간으로 추천 리스트들 불러옴
+                List<Recommend> latestRecommends = recommendRepository.findAllByUserAndCreatedAt(user, latestTime);
+
+                previousPlaces = latestRecommends.stream()
+                        .map(r -> RecommendRequestDTO.PreviousPlaceDTO.builder()
+                                .name(r.getName())
+                                .address(r.getRoadAddress())
+                                .build())
+                        .toList();
+            }
+        }
+
         return RecommendRequestDTO.RecommendFastDTO.builder()
                 .mood_keywords(rq.getPlace_mood())
                 .place_category(convertedCategory)
                 .search_query(searchQuery)
+                .previous_places(previousPlaces)
                 .build();
     }
 

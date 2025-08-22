@@ -27,13 +27,22 @@ public class RecommendRequestDTO {
         private Boolean duplicate;
     }
 
-    //추천 받기 fastapi용
+    //중복 제거용
+    @Getter
+    @Builder
+    public static class PreviousPlaceDTO {
+        private String name;
+        private String address;
+    }
+
+    //추천 받기 fast api용 (조회용)
     @Getter
     @Builder
     public static class RecommendFastDTO{
         private List<String> mood_keywords;
         private String place_category;
         private String search_query;
+        private List<PreviousPlaceDTO> previous_places;
     }
 
     //추천 받기 (최종 저장용)

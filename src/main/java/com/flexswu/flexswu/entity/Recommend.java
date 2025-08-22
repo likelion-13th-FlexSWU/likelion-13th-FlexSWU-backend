@@ -4,13 +4,15 @@ import com.flexswu.flexswu.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Recommend extends BaseEntity {
+public class Recommend{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,4 +38,8 @@ public class Recommend extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // 아래 두 필드 추가
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

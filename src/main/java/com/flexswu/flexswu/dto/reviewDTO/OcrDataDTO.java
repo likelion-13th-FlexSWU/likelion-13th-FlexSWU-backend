@@ -1,4 +1,4 @@
-package com.flexswu.flexswu.dto.recommendDTO;
+package com.flexswu.flexswu.dto.reviewDTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

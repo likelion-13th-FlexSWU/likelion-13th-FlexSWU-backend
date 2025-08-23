@@ -1,6 +1,6 @@
 package com.flexswu.flexswu.service;
 
-import com.flexswu.flexswu.dto.recommendDTO.OcrDataDTO;
+import com.flexswu.flexswu.dto.reviewDTO.OcrDataDTO;
 import com.flexswu.flexswu.entity.*;
 import com.flexswu.flexswu.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,13 +30,13 @@ public class MissionService {
 
 
     @Transactional
-    public String authenticateMission(Long userId, Long missionId, OcrDataDTO ocrData) {
+    public String authenticateMission(Long userId, OcrDataDTO ocrData) {
         // 1. 필수 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
-        Mission mission = missionRepository.findById(missionId)
-                .orElseThrow(() -> new EntityNotFoundException("미션을 찾을 수 없습니다. ID: " + missionId));
+        Mission mission = missionRepository.findById(ocrData.getMissionId())
+                .orElseThrow(() -> new EntityNotFoundException("미션을 찾을 수 없습니다. ID: " + ocrData.getMissionId()));
 
         // 사용자의 가장 최근 추천 장소(Recommend) 조회
         Recommend latestRecommend = recommendRepository.findTopByUserOrderByCreatedAtDesc(user)
@@ -53,7 +53,7 @@ public class MissionService {
         }
 
         // 3. 미션별 세부 조건 확인
-        if (!isMissionConditionSatisfied(missionId, ocrData)) {
+        if (!isMissionConditionSatisfied(mission.getId(), ocrData)) {
             throw new IllegalArgumentException("미션 세부 조건을 만족하지 못했습니다.");
         }
 

@@ -1,5 +1,6 @@
 package com.flexswu.flexswu.service;
 
+import com.flexswu.flexswu.dto.missionDTO.MissionResponseDTO;
 import com.flexswu.flexswu.dto.reviewDTO.OcrDataDTO;
 import com.flexswu.flexswu.entity.*;
 import com.flexswu.flexswu.repository.*;
@@ -19,6 +20,7 @@ public class MissionService {
 
     private final UserRepository userRepository;
     private final MissionRepository missionRepository;
+    private final ReviewRepository reviewRepository;
     private final RecommendRepository recommendRepository;
     private final RegionScoreRepository regionScoreRepository;
     private final UserScoreMonthRepository userScoreMonthRepository;
@@ -142,5 +144,95 @@ public class MissionService {
 
         // AI 방문 미션(ID: 2)처럼 장소 인증만 필요한 미션의 경우 true를 반환
         return true;
+    }
+
+    //미션 메인페이지
+    public MissionResponseDTO.MissionRsDTO missionMain(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        // 지역 점수 테이블에 해당 지역 있는 지 확인 > 없으면 생성해 둠
+        regionScoreRepository.findBySidoAndGugun(user.getSido(), user.getGugun())
+                .orElseGet(() -> {
+                    RegionScore regionScore = RegionScore.builder()
+                            .sido(user.getSido())
+                            .gugun(user.getGugun())
+                            .build();
+                    return regionScoreRepository.save(regionScore);
+                });
+
+        //같은 시도 내 region, me rank 계산
+        //region
+        List<RegionScore> allRegionScores = regionScoreRepository.findAllBySidoOrderByScoreDesc(user.getSido());
+
+        int regionRankVal = 1;
+        int regionScoreVal = 0;
+        for (int i = 0; i < allRegionScores.size(); i++) {
+            RegionScore rs = allRegionScores.get(i);
+            if (rs.getGugun().equals(user.getGugun())) {
+                regionRankVal = i + 1;
+                regionScoreVal = rs.getScore();
+                break;
+            }
+        }
+        //me
+        List<User> allUsers = userRepository.findAllBySidoOrderByTotalScoreDesc(user.getSido());
+
+        int meRankVal = 1;
+        int meScoreVal = user.getTotalScore();
+        for (int i = 0; i < allUsers.size(); i++) {
+            if (allUsers.get(i).getId().equals(user.getId())) {
+                meRankVal = i + 1;
+                break;
+            }
+        }
+
+        // 해커톤 시에는 기간에 따라 변화하는 것을 보여주지 못하기 때문에 현재는 전체 미션 리스트를 반환하나
+        // 확장 시, 미션 기간을 정해 현재 기간에 맞춰 진행 가능한 미션만 내려 보낼 수 있도록 해야함
+        List<MissionResponseDTO.MissionRsDTO.MissionDTO> missions = missionRepository.findAll()
+                .stream()
+                .map(mission -> {
+                    // 인증 기록 가져오기
+                    MissionAuthentication auth = missionAuthenticationRepository.findByUserAndMission(user, mission)
+                            .orElse(null);
+
+                    boolean isVerified = (auth != null);
+                    boolean isReviewed = false;
+
+                    if (auth != null) {
+                        // review 테이블에서 mission_authentication_id 로 체크
+                        isReviewed = reviewRepository.existsByMissionAuthentication(auth);
+                    }
+
+                    return MissionResponseDTO.MissionRsDTO.MissionDTO.builder()
+                            .id(mission.getId())
+                            .title(mission.getTitle())
+                            .body(mission.getBody())
+                            .score(mission.getScore())
+                            .is_special(mission.isSpecial())
+                            .is_verified(isVerified)
+                            .is_reviewed(isReviewed)
+                            .build();
+                })
+                .toList();
+
+
+
+        return MissionResponseDTO.MissionRsDTO.builder()
+                .gugun(user.getGugun())
+                .region( // 지역 rank/score
+                        MissionResponseDTO.MissionRsDTO.RankScoreDTO.builder()
+                                .rank(regionRankVal)
+                                .score(regionScoreVal)
+                                .build()
+                )
+                .me( // 내 rank/score
+                        MissionResponseDTO.MissionRsDTO.RankScoreDTO.builder()
+                                .rank(meRankVal)
+                                .score(meScoreVal)
+                                .build()
+                )
+                .missions(missions)
+                .build();
     }
 }

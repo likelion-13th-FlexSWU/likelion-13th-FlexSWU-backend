@@ -4,15 +4,19 @@ import com.flexswu.flexswu.dto.userDTO.UserRequestDTO;
 import com.flexswu.flexswu.dto.userDTO.UserResponseDTO;
 import com.flexswu.flexswu.entity.RegionScore;
 import com.flexswu.flexswu.entity.User;
+import com.flexswu.flexswu.entity.UserScoreMonth;
 import com.flexswu.flexswu.jwt.JwtUtil;
 import com.flexswu.flexswu.jwt.TokenStatus;
 import com.flexswu.flexswu.repository.RegionScoreRepository;
 import com.flexswu.flexswu.repository.UserRepository;
+import com.flexswu.flexswu.repository.UserScoreMonthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class UserService {
     private final RegionScoreRepository regionScoreRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final UserScoreMonthRepository userScoreMonthRepository;
 
     public void createUser(UserRequestDTO.CreateUserRqDTO request){
         // 기존 사용자 확인
@@ -146,6 +151,41 @@ public class UserService {
         userRepository.save(user);
 
         return "닉네임 변경 완료";
+    }
+
+    //내 정보
+    public UserResponseDTO.UserInfoRsDTO userInfo(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        // 지역 점수 테이블 확인
+        regionScoreRepository.findBySidoAndGugun(user.getSido(), user.getGugun())
+                .orElseThrow(() -> new IllegalArgumentException("해당 지역 점수 정보가 없습니다."));
+
+        // 최근 6개월 시작 지점 계산
+        YearMonth now = YearMonth.now();           // ex. 2025-08
+        YearMonth sixMonthsAgo = now.minusMonths(5); // ex. 2025-03
+        int fromMonth = sixMonthsAgo.getYear() * 100 + sixMonthsAgo.getMonthValue(); // 202503
+
+        // 최근 6개월 데이터만 가져오기
+        List<UserScoreMonth> scores = userScoreMonthRepository
+                .findByUserAndSidoAndGugunAndMonthGreaterThanEqualOrderByMonthDesc(user, user.getSido(), user.getGugun(), fromMonth);
+
+        List<UserResponseDTO.UserInfoRsDTO.MonthlyScoreDTO> monthlyDtos = scores.stream()
+                .map(s -> UserResponseDTO.UserInfoRsDTO.MonthlyScoreDTO.builder()
+                        .month(String.valueOf(s.getMonth()).substring(0,4) + "-" + String.valueOf(s.getMonth()).substring(4,6)) // int > string
+                        .score(s.getScore())
+                        .build())
+                .toList();
+
+        return UserResponseDTO.UserInfoRsDTO.builder()
+                .sido(user.getSido())
+                .gugun(user.getGugun())
+                .username(user.getUsername())
+                .type(user.getUserType())
+                .monthly(monthlyDtos)
+                .build();
+
     }
 
 }

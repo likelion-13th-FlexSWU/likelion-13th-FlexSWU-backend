@@ -123,4 +123,11 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok(userService.updateUsername(request, userDetails.getUserId()));
     }
+
+    //내 정보
+    @GetMapping("")
+    public ResponseEntity<UserResponseDTO.UserInfoRsDTO> userInfo(
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(userService.userInfo(userDetails.getUserId()));
+    }
 }

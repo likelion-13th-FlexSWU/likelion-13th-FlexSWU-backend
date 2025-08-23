@@ -1,5 +1,6 @@
 package com.flexswu.flexswu.controller;
 
+import com.flexswu.flexswu.dto.missionDTO.MissionResponseDTO;
 import com.flexswu.flexswu.dto.reviewDTO.OcrDataDTO;
 import com.flexswu.flexswu.jwt.CustomUserDetails;
 import com.flexswu.flexswu.service.MissionService;
@@ -28,5 +29,12 @@ public class MissionController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    //미션 메인페이지
+    @GetMapping("")
+    public ResponseEntity<MissionResponseDTO.MissionRsDTO> getAllMissions(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(missionService.missionMain(userDetails.getUserId()));
     }
 }

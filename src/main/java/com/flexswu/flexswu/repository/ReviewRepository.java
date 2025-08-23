@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findAllByUserOrderByIdDesc(User user);
     boolean existsByMissionAuthenticationAndUser(MissionAuthentication auth, User user);
+    boolean existsByMissionAuthentication(MissionAuthentication missionAuthentication);
     //boolean existsByMissionIdAndUser(Long missionId, User user);
 }

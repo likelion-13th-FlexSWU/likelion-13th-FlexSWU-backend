@@ -1,9 +1,13 @@
 package com.flexswu.flexswu.service;
 
 import com.flexswu.flexswu.dto.reviewDTO.*;
+import com.flexswu.flexswu.entity.Mission;
+import com.flexswu.flexswu.entity.MissionAuthentication;
 import com.flexswu.flexswu.entity.Review;
 import com.flexswu.flexswu.entity.User;
 import com.flexswu.flexswu.jwt.SecurityUtil;
+import com.flexswu.flexswu.repository.MissionAuthenticationRepository;
+import com.flexswu.flexswu.repository.MissionRepository;
 import com.flexswu.flexswu.repository.ReviewRepository;
 import com.flexswu.flexswu.repository.UserRepository;
 import com.flexswu.flexswu.dto.reviewDTO.TagCodeDTO;
@@ -23,7 +27,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class MissionReviewService {
-
+    private final MissionAuthenticationRepository missionAuthenticationRepository;
+    private final MissionRepository missionRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
 
@@ -36,6 +41,17 @@ public class MissionReviewService {
     @Transactional
     public Long create(ReviewCreateRequest req) {
         User user = getLoginUser();
+
+        Mission mission = missionRepository.findById(req.getMission_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "미션 없음"));
+
+        MissionAuthentication auth = missionAuthenticationRepository
+                .findByMissionAndUser(mission, user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "미션 인증 전이므로 리뷰 작성 불가"));
+
+        if (reviewRepository.existsByMissionAuthenticationAndUser(auth, user)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 리뷰를 작성했습니다.");
+        }
 
         // === 명세 반영: tags 1~4개 필수, 각 값은 1..20, 중복 금지 ===
         if (req.getTags() == null || req.getTags().isEmpty()) {
@@ -56,17 +72,13 @@ public class MissionReviewService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tags에 중복 값이 있습니다.");
         }
 
-        LocalDate visited = null;
-        if (req.getVisitedAt() != null && !req.getVisitedAt().isBlank()) {
-            visited = LocalDate.parse(req.getVisitedAt());
-        }
 
         Review review = Review.builder()
-                .missionId(req.getMission_id())
+                .missionAuthentication(auth)
                 .user(user)
-                .placeName(req.getPlaceName())
+                .placeName(auth.getRecommend().getName())
                 .content(req.getContent()) // content는 null 가능
-                .visitedAt(visited)
+                .visitedAt(auth.getVisitedAt())
                 .build();
 
         review.getTagCodes().addAll(req.getTags());

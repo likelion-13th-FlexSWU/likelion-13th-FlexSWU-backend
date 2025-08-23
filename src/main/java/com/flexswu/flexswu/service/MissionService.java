@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -42,18 +44,26 @@ public class MissionService {
         Recommend latestRecommend = recommendRepository.findTopByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new IllegalStateException("추천받은 장소 기록이 없습니다."));
 
-        // 2. 장소 일치 여부 확인 (도로명 주소 우선, 다음으로 지번, 없으면 전화번호로)
-        // OCR의 'address'는 Recommend의 'roadAddress'와 비교
-        boolean isPlaceMatch = Objects.equals(ocrData.getAddress(), latestRecommend.getRoadAddress()) ||
-                Objects.equals(ocrData.getAddress(), latestRecommend.getAddress()) ||
-                Objects.equals(ocrData.getPhoneNum(), latestRecommend.getPhoneNum());
+        LocalDateTime latestTime = latestRecommend.getCreatedAt(); //추천 생성 시간으로 추천 리스트들 불러옴
+        List<Recommend> latestRecommends = recommendRepository.findAllByUserAndCreatedAt(user, latestTime);
 
-        if (!isPlaceMatch) {
-            throw new IllegalArgumentException("추천 장소와 영수증의 장소가 일치하지 않습니다.");
-        }
+        // 2. 장소 일치 여부 확인 (도로명 주소 우선, 다음으로 지번, 없으면 전화번호로) 추천 리스트들을 돌면서 비교
+        // OCR의 'address'는 Recommend의 'roadAddress'와 비교
+//        boolean isPlaceMatch = Objects.equals(ocrData.getAddress(), latestRecommend.getRoadAddress()) ||
+//                Objects.equals(ocrData.getAddress(), latestRecommend.getAddress()) ||
+//                Objects.equals(ocrData.getPhoneNum(), latestRecommend.getPhoneNum());
+        // ocr 데이터와 일치한 추천 장소 > 리스트에 일치한 정보가 없으면 에러처리
+        Recommend matchedRecommend = latestRecommends.stream()
+                .filter(r ->
+                        Objects.equals(ocrData.getAddress(), r.getRoadAddress()) ||
+                                Objects.equals(ocrData.getAddress(), r.getAddress()) ||
+                                Objects.equals(ocrData.getPhoneNum(), r.getPhoneNum())
+                )
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("OCR 데이터와 일치하는 추천 장소가 없습니다."));
 
         // 3. 미션별 세부 조건 확인
-        if (!isMissionConditionSatisfied(mission.getId(), ocrData)) {
+        if (!isMissionConditionSatisfied(matchedRecommend.getId(), ocrData)) {
             throw new IllegalArgumentException("미션 세부 조건을 만족하지 못했습니다.");
         }
 
@@ -86,7 +96,8 @@ public class MissionService {
         MissionAuthentication auth = MissionAuthentication.builder()
                 .user(user)
                 .mission(mission)
-                .recommend(latestRecommend) // recommend 객체를 통째로 저장
+                .recommend(matchedRecommend) // recommend 객체를 통째로 저장
+                .visitedAt(ocrData.getVisitedAt())
                 .build();
         missionAuthenticationRepository.save(auth);
 

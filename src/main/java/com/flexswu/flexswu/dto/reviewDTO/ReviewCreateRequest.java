@@ -18,8 +18,4 @@ public class ReviewCreateRequest {
 
     // nullable 허용
     private String content;
-
-    private String placeName;
-    private String title;
-    private String visitedAt; // "yyyy-MM-dd"
 }

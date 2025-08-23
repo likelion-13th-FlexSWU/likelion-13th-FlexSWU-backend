@@ -9,13 +9,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/missions")
+@RequestMapping("/mission")
 @RequiredArgsConstructor
 public class MissionController {
 
     private final MissionService missionService;
 
-    @PostMapping("/mission/check")
+    @PostMapping("/check")
     public ResponseEntity<String> authenticate(
             @RequestBody OcrDataDTO ocrData,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

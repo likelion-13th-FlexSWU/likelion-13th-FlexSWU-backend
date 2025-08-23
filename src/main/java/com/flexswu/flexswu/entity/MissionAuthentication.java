@@ -30,13 +30,13 @@ public class MissionAuthentication extends BaseEntity {
     private Recommend recommend;
 
     @Column(nullable = false)
-    private LocalDateTime authenticatedAt;
+    private LocalDateTime visitedAt;
 
     @Builder
-    public MissionAuthentication(User user, Mission mission, Recommend recommend) {
+    public MissionAuthentication(User user, Mission mission, Recommend recommend, LocalDateTime visitedAt) {
         this.user = user;
         this.mission = mission;
         this.recommend = recommend;
-        this.authenticatedAt = LocalDateTime.now();
+        this.visitedAt = visitedAt;
     }
 }

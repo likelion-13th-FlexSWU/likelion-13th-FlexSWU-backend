@@ -64,10 +64,33 @@ public class RecommendService {
         String regionJoin = String.join(" ", rq.getRegion()); //ex 노원구 공릉동
         String searchQuery = user.getSido() + " " + regionJoin; //ex 서울 노원구 공릉동
 
+        //장소 카테고리 카카오 맵 키워드 검색 기준으로 변환
+        String convertedCategory = convertCategory(rq.getPlace_category());
+
+        List<RecommendRequestDTO.PreviousPlaceDTO> previousPlaces = null;
+
+        //중복 방지용 장소 리스트 생성
+        if (!rq.getDuplicate()) {
+            Recommend latest = recommendRepository.findTopByUserOrderByCreatedAtDesc(user).orElse(null);
+            //직전 추천 존재 시 && 직전 추천 카테고리와 카테고리가 동일할 시에
+            if (latest != null && latest.getCategory().equals(rq.getPlace_category())) {
+                LocalDateTime latestTime = latest.getCreatedAt(); //추천 생성 시간으로 추천 리스트들 불러옴
+                List<Recommend> latestRecommends = recommendRepository.findAllByUserAndCreatedAt(user, latestTime);
+
+                previousPlaces = latestRecommends.stream()
+                        .map(r -> RecommendRequestDTO.PreviousPlaceDTO.builder()
+                                .name(r.getName())
+                                .address(r.getRoadAddress())
+                                .build())
+                        .toList();
+            }
+        }
+
         return RecommendRequestDTO.RecommendFastDTO.builder()
                 .mood_keywords(rq.getPlace_mood())
-                .place_category(rq.getPlace_category())
+                .place_category(convertedCategory)
                 .search_query(searchQuery)
+                .previous_places(previousPlaces)
                 .build();
     }
 
@@ -123,5 +146,23 @@ public class RecommendService {
 
         // 4. 설문 횟수를 컨트롤러로 반환
         return surveyCount;
+    }
+
+    //카테고리 매핑
+    private String convertCategory(String category) {
+        return switch (category) {
+            case "한식당" -> "한식";
+            case "일식당" -> "일식";
+            case "중식당" -> "중식";
+            case "양식집" -> "양식";
+            case "분식집" -> "분식";
+            case "커피 전문점" -> "카페";
+            case "호프집" -> "술집";
+            case "일본식 주점" -> "이자카야";
+            case "제과점, 베이커리" -> "빵";
+            case "아이스크림 가게" -> "아이스크림";
+            case "소품샵" -> "디자인문구";
+            default -> throw new IllegalArgumentException("정의되지 않은 카테고리");
+        };
     }
 }

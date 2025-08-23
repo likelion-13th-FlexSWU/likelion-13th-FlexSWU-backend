@@ -42,9 +42,10 @@ public class MissionService {
         Recommend latestRecommend = recommendRepository.findTopByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new IllegalStateException("추천받은 장소 기록이 없습니다."));
 
-        // 2. 장소 일치 여부 확인 (도로명 주소 우선, 없으면 전화번호로)
+        // 2. 장소 일치 여부 확인 (도로명 주소 우선, 다음으로 지번, 없으면 전화번호로)
         // OCR의 'address'는 Recommend의 'roadAddress'와 비교
         boolean isPlaceMatch = Objects.equals(ocrData.getAddress(), latestRecommend.getRoadAddress()) ||
+                Objects.equals(ocrData.getAddress(), latestRecommend.getAddress()) ||
                 Objects.equals(ocrData.getPhoneNum(), latestRecommend.getPhoneNum());
 
         if (!isPlaceMatch) {

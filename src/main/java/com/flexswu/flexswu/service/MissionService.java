@@ -42,6 +42,23 @@ public class MissionService {
         Mission mission = missionRepository.findById(ocrData.getMissionId())
                 .orElseThrow(() -> new EntityNotFoundException("미션을 찾을 수 없습니다. ID: " + ocrData.getMissionId()));
 
+        // 해커톤 기간 내에 동일한 미션을 이미 인증했는지 확인하는 로직을 추가
+        // 1-1. 해커톤 기간 내 미션 중복 인증 방지
+        missionAuthenticationRepository.findByUserAndMission(user, mission).ifPresent(auth -> {
+            // 해커톤 기간을 하드코딩으로 정의합니다.
+            LocalDate hackathonStart = LocalDate.of(2025, 8, 20);
+            LocalDate hackathonEnd = LocalDate.of(2025, 8, 27);
+
+            // 기존 인증 기록의 날짜를 가져옴
+            LocalDate authDate = auth.getCreatedAt().toLocalDate();
+
+            // 기존 인증 날짜가 해커톤 기간 내에 있는지 확인
+            if (!authDate.isBefore(hackathonStart) && !authDate.isAfter(hackathonEnd)) {
+                // 기간 내에 있다면, 예외를 발생시켜 중복 인증을 막음
+                throw new IllegalStateException("기간 내에 이미 인증한 미션입니다.");
+            }
+        });
+
         // 사용자의 가장 최근 추천 장소(Recommend) 조회
         Recommend latestRecommend = recommendRepository.findTopByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new IllegalStateException("추천받은 장소 기록이 없습니다."));
@@ -63,6 +80,11 @@ public class MissionService {
                 )
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("OCR 데이터와 일치하는 추천 장소가 없습니다."));
+
+        // 2-1. 장소 기준 중복 인증 확인
+        if (missionAuthenticationRepository.existsByUserAndRecommend(user, matchedRecommend)) {
+            throw new IllegalStateException("이미 이 장소로 다른 미션을 인증했습니다.");
+        }
 
         // 3. 미션별 세부 조건 확인
         if (!isMissionConditionSatisfied(ocrData.getMissionId(), ocrData)) {

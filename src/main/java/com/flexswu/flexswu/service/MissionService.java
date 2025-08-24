@@ -65,7 +65,7 @@ public class MissionService {
                 .orElseThrow(() -> new IllegalStateException("OCR 데이터와 일치하는 추천 장소가 없습니다."));
 
         // 3. 미션별 세부 조건 확인
-        if (!isMissionConditionSatisfied(matchedRecommend.getId(), ocrData)) {
+        if (!isMissionConditionSatisfied(ocrData.getMissionId(), ocrData)) {
             throw new IllegalArgumentException("미션 세부 조건을 만족하지 못했습니다.");
         }
 

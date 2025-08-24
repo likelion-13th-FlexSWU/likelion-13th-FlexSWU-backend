@@ -1,5 +1,6 @@
 package com.flexswu.flexswu.controller;
 
+import com.flexswu.flexswu.dto.recommendDTO.RecommendMainResponseDTO;
 import com.flexswu.flexswu.dto.recommendDTO.RecommendRequestDTO;
 import com.flexswu.flexswu.dto.recommendDTO.RecommendResponseDTO;
 import com.flexswu.flexswu.dto.userDTO.UserRequestDTO;
@@ -12,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/recommend")
@@ -42,6 +40,15 @@ public class RecommendController {
 
         // surveyCount 값을 응답 본문에 담아 200 OK 상태로 반환
         return ResponseEntity.ok(surveyCount);
+    }
+
+    // 메인 화면 조회
+    @GetMapping
+    public ResponseEntity<RecommendMainResponseDTO> getRecommendMainPage(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        RecommendMainResponseDTO responseDto = recommendService.getRecommendMainPage(userDetails.getUserId());
+        return ResponseEntity.ok(responseDto);
     }
 
 }

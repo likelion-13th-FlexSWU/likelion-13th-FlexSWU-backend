@@ -1,5 +1,6 @@
 package com.flexswu.flexswu.service;
 
+import com.flexswu.flexswu.dto.recommendDTO.RecommendMainResponseDTO;
 import com.flexswu.flexswu.dto.recommendDTO.RecommendRequestDTO;
 import com.flexswu.flexswu.dto.recommendDTO.RecommendResponseDTO;
 import com.flexswu.flexswu.dto.userDTO.UserPreferenceUpdateDTO;
@@ -11,8 +12,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -165,4 +170,60 @@ public class RecommendService {
             default -> throw new IllegalArgumentException("정의되지 않은 카테고리");
         };
     }
+
+    // 추천 메인 페이지 조회
+    public RecommendMainResponseDTO getRecommendMainPage(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        // 오늘 날짜의 시작 시간 (오늘 추천/과거 추천을 나누는 기준)
+        LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+
+        // 1. 오늘 추천받은 기록 조회
+        List<Recommend> todayRecommends = recommendRepository.findAllByUserAndCreatedAtAfter(user, startOfToday);
+        List<RecommendMainResponseDTO.StoreDTO> todayStores = todayRecommends.stream()
+                .map(this::toStoreDTO)
+                .distinct() // 중복 제거 로직 추가
+                .collect(Collectors.toList());
+
+        // 2. 과거 추천 기록 조회
+        List<RecommendMainResponseDTO.StoreDTO> pastStores = new ArrayList<>(); // 결과를 담을 리스트 초기화
+
+        // 2-1. 가장 최근의 '과거 추천 기록' 한 개를 먼저 찾아서, 추천받은 시각(timestamp)을 알아냄
+        Optional<Recommend> latestPastRec = recommendRepository.findTopByUserAndCreatedAtBeforeOrderByCreatedAtDesc(user, startOfToday);
+
+        // 2-2. 만약 과거 추천 기록이 존재한다면,
+        if (latestPastRec.isPresent()) {
+            // 그 기록의 정확한 생성 시각을 가져옴
+            LocalDateTime latestPastTimestamp = latestPastRec.get().getCreatedAt();
+
+            // 2-3. 해당 시각에 저장된 '모든' 추천 기록들을 전부 불러옴 (한 묶음 전체)
+            List<Recommend> allLatestPastRecommends = recommendRepository.findAllByUserAndCreatedAt(user, latestPastTimestamp);
+
+            // 2-4. 불러온 기록들을 DTO로 변환
+            pastStores = allLatestPastRecommends.stream()
+                    .map(this::toStoreDTO)
+                    .distinct() // 중복 제거 로직 추가
+                    .collect(Collectors.toList());
+        }
+
+        // 3. 응답 DTO 조립
+        return RecommendMainResponseDTO.builder()
+                .username(user.getUsername()) // User 엔티티의 사용자 이름 필드로 가정
+                .gugun(user.getGugun())
+                .todayRecommend(RecommendMainResponseDTO.TodayRecommendDTO.builder().stores(todayStores).build())
+                .pastRecommend(pastStores)
+                .build();
+    }
+
+    // Recommend 엔티티를 StoreDTO로 변환하는 헬퍼 메소드
+    private RecommendMainResponseDTO.StoreDTO toStoreDTO(Recommend recommend) {
+        return RecommendMainResponseDTO.StoreDTO.builder()
+                .name(recommend.getName())
+                .category(recommend.getCategory())
+                .address(recommend.getRoadAddress()) // 대표 주소로 도로명 주소 사용
+                .url(recommend.getUrl())
+                .build();
+    }
+
 }

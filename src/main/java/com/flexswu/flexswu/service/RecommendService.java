@@ -38,8 +38,8 @@ public class RecommendService {
                 .findTopByUserOrderByCreatedAtDesc(user)
                 .orElse(null);
 
-        //최근 추천이 있고, 생성 시간이 24시간 이내면 에러
-        if (latest != null && latest.getCreatedAt().isAfter(LocalDateTime.now().minusHours(24))) {
+        //최근 추천이 있고, 자정이 지나면 초기화
+        if (latest != null && latest.getCreatedAt().toLocalDate().isEqual(LocalDate.now())) {
             throw new IllegalArgumentException("오늘 이미 추천을 받았습니다.");
         }
 

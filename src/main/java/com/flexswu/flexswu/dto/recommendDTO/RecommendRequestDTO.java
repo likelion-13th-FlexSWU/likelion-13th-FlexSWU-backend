@@ -14,16 +14,12 @@ public class RecommendRequestDTO {
     @Getter
     @Builder
     public static class RecommendRqDTO{
-        @NotEmpty
         private List<String> region;
 
-        @NotBlank
         private String place_category;
 
-        @NotEmpty
         private List<String> place_mood;
 
-        @NotNull
         private Boolean duplicate;
     }
 
@@ -49,10 +45,8 @@ public class RecommendRequestDTO {
     @Getter
     @Builder
     public static class RecommendRqFinalSaveDTO {
-        @NotEmpty
         private List<String> place_mood;
 
-        @NotBlank
         private String category;
 
         @NotEmpty

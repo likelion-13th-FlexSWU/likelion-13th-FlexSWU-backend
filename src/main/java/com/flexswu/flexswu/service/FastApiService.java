@@ -25,7 +25,7 @@ public class FastApiService {
     // test
     public String pingRootText() {
         return fastApiRestClient.get()
-                .uri("/")                          // 외부 Past API의 루트
+                .uri("/")
                 .accept(MediaType.APPLICATION_JSON) // 루트가 JSON이면 OK, text여도 String으로 수신 가능
                 .retrieve()
                 .body(String.class);
@@ -67,10 +67,15 @@ public class FastApiService {
 
     // 추천 받기 api 호출
     public List<RecommendResponseDTO.RecommendFastDTO> getRecommendations(
-            RecommendRequestDTO.RecommendFastDTO body
+            RecommendRequestDTO.RecommendFastDTO body,
+            Boolean weather
     ) {
         RecommendResponseDTO.RecommendListDTO wrapper = fastApiRestClient.post()
-                .uri("/recommendations")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/recommendations")
+                        .queryParam("weather", weather)
+                        .build()
+                )
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(body)

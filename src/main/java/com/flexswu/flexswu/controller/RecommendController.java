@@ -25,8 +25,9 @@ public class RecommendController {
     @PostMapping("/today")
     public ResponseEntity<RecommendResponseDTO.RecommendFullResponseDTO> recommendToday(
             @RequestBody @Valid RecommendRequestDTO.RecommendRqDTO request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(recommendService.recommendToday(request, userDetails.getUserId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(value = "weather", required = false) Boolean weather) {
+        return ResponseEntity.ok(recommendService.recommendToday(request, userDetails.getUserId(), weather));
     }
 
     //추천 받기 (최종 저장용)

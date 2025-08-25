@@ -41,6 +41,7 @@ public class RecommendResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RecommendListDTO {
+        private String weather;
         private List<RecommendFastDTO> recommendations;
     }
 }

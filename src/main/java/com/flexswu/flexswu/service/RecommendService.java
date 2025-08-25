@@ -48,15 +48,15 @@ public class RecommendService {
         }
 
         // HTTP 요청 DTO -> FastAPI 요청 DTO 변환
-        RecommendRequestDTO.RecommendFastDTO fastBody = toFastApiBody(request, user);
+        RecommendRequestDTO.RecommendFastDTO fastBody = toFastApiBody(request, user, weather);
 
-        // fastAPI 호출해서 추천 리스트 받아옴
-        List<RecommendResponseDTO.RecommendFastDTO> stores = fastApiService.getRecommendations(fastBody, weather);
+        // fastAPI 호출해서 결과 전체 받음
+        RecommendResponseDTO.RecommendListDTO response = fastApiService.getRecommendations(fastBody, weather);
 
         return RecommendResponseDTO.RecommendFullResponseDTO.builder()
                 .place_mood(request.getPlace_mood())
-                .category(request.getPlace_category())
-                .stores(stores)
+                .category(response.getWeather() != null ? response.getWeather() : request.getPlace_category())
+                .stores(response.getRecommendations())
                 .build();
     }
 
@@ -64,13 +64,17 @@ public class RecommendService {
      * HTTP 요청 DTO -> FastAPI DTO 변환
      */
     private RecommendRequestDTO.RecommendFastDTO toFastApiBody(
-            RecommendRequestDTO.RecommendRqDTO rq, User user
+            RecommendRequestDTO.RecommendRqDTO rq, User user, Boolean weather
     ) {
         String regionJoin = String.join(" ", rq.getRegion()); //ex 노원구 공릉동
         String searchQuery = user.getSido() + " " + regionJoin; //ex 서울 노원구 공릉동
 
-        //장소 카테고리 카카오 맵 키워드 검색 기준으로 변환
-        String convertedCategory = convertCategory(rq.getPlace_category());
+        String convertedCategory = null;
+
+        //기본 추천일 때만 > 장소 카테고리 카카오 맵 키워드 검색 기준으로 변환
+        if (weather == null || !weather) {
+            convertedCategory = convertCategory(rq.getPlace_category());
+        }
 
         List<RecommendRequestDTO.PreviousPlaceDTO> previousPlaces = null;
 

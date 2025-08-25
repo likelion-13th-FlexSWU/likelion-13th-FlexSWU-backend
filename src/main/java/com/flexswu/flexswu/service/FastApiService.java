@@ -66,16 +66,12 @@ public class FastApiService {
     }
 
     // 추천 받기 api 호출
+    /*
     public List<RecommendResponseDTO.RecommendFastDTO> getRecommendations(
-            RecommendRequestDTO.RecommendFastDTO body,
-            Boolean weather
+            RecommendRequestDTO.RecommendFastDTO body
     ) {
         RecommendResponseDTO.RecommendListDTO wrapper = fastApiRestClient.post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/recommendations")
-                        .queryParam("weather", weather)
-                        .build()
-                )
+                .uri("/recommendations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(body)
@@ -84,4 +80,25 @@ public class FastApiService {
 
         return wrapper != null ? wrapper.getRecommendations() : List.of();
     }
+    */
+    // 추천 받기 api 호출
+    public RecommendResponseDTO.RecommendListDTO getRecommendations(
+            RecommendRequestDTO.RecommendFastDTO body,
+            Boolean weather
+    ) {
+        return fastApiRestClient.post()
+                .uri(uriBuilder -> {
+                    var builder = uriBuilder.path("/recommendations");
+                    if (weather != null) {
+                        builder.queryParam("weather", weather);
+                    }
+                    return builder.build();
+                })
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(RecommendResponseDTO.RecommendListDTO.class);
+    }
+
 }

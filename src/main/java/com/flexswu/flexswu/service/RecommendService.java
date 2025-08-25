@@ -28,7 +28,7 @@ public class RecommendService {
     private final UserPreferenceService userPreferenceService;
 
     //추천 받기 (조회용)
-    public RecommendResponseDTO.RecommendFullResponseDTO recommendToday(RecommendRequestDTO.RecommendRqDTO request, Long userId) {
+    public RecommendResponseDTO.RecommendFullResponseDTO recommendToday(RecommendRequestDTO.RecommendRqDTO request, Long userId, Boolean weather) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
@@ -51,7 +51,7 @@ public class RecommendService {
         RecommendRequestDTO.RecommendFastDTO fastBody = toFastApiBody(request, user);
 
         // fastAPI 호출해서 추천 리스트 받아옴
-        List<RecommendResponseDTO.RecommendFastDTO> stores = fastApiService.getRecommendations(fastBody);
+        List<RecommendResponseDTO.RecommendFastDTO> stores = fastApiService.getRecommendations(fastBody, weather);
 
         return RecommendResponseDTO.RecommendFullResponseDTO.builder()
                 .place_mood(request.getPlace_mood())

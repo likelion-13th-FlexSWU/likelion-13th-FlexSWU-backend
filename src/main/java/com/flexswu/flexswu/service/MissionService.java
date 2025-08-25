@@ -189,10 +189,17 @@ public class MissionService {
 
         int regionRankVal = 1;
         int regionScoreVal = 0;
-        for (int i = 0; i < allRegionScores.size(); i++) {
-            RegionScore rs = allRegionScores.get(i);
+        int prevRegionScore = -1;
+        int currentRegionRank = 0;
+
+        for (RegionScore rs : allRegionScores) {
+            if (rs.getScore() != prevRegionScore) {
+                currentRegionRank++;          // 점수가 달라질 때마다 rank +1
+                prevRegionScore = rs.getScore();
+            }
+
             if (rs.getGugun().equals(user.getGugun())) {
-                regionRankVal = i + 1;
+                regionRankVal = currentRegionRank;
                 regionScoreVal = rs.getScore();
                 break;
             }
@@ -202,9 +209,17 @@ public class MissionService {
 
         int meRankVal = 1;
         int meScoreVal = user.getTotalScore();
-        for (int i = 0; i < allUsers.size(); i++) {
-            if (allUsers.get(i).getId().equals(user.getId())) {
-                meRankVal = i + 1;
+        int prevUserScore = -1;
+        int currentUserRank = 0;
+
+        for (User u : allUsers) {
+            if (u.getTotalScore() != prevUserScore) {
+                currentUserRank++;           // 점수가 달라질 때마다 rank +1
+                prevUserScore = u.getTotalScore();
+            }
+
+            if (u.getId().equals(user.getId())) {
+                meRankVal = currentUserRank;
                 break;
             }
         }

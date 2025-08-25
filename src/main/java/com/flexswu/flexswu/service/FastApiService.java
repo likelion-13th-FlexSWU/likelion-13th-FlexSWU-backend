@@ -25,7 +25,7 @@ public class FastApiService {
     // test
     public String pingRootText() {
         return fastApiRestClient.get()
-                .uri("/")                          // 외부 Past API의 루트
+                .uri("/")
                 .accept(MediaType.APPLICATION_JSON) // 루트가 JSON이면 OK, text여도 String으로 수신 가능
                 .retrieve()
                 .body(String.class);

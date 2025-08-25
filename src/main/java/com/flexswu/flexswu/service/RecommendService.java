@@ -118,7 +118,6 @@ public class RecommendService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        //base entity 사용 X > 수동 지정 (장소들 시각 통일을 위한)
         LocalDateTime now = LocalDateTime.now();
 
         List<Recommend> toSave = request.getStores().stream()
@@ -135,23 +134,30 @@ public class RecommendService {
                         .build())
                 .toList();
 
+        // 1. 추천된 장소 목록은 항상 DB에 저장
         recommendRepository.saveAll(toSave);
 
-        UserPreferenceUpdateDTO preferenceUpdateDTO = new UserPreferenceUpdateDTO();
-        preferenceUpdateDTO.setSelectedCategories(request.getPlace_mood());
+        int surveyCount = 0; // 설문 횟수 변수 선언
 
-        // 1. userPreferenceService를 호출하고, 반환된 설문 횟수를 변수에 저장
-        int surveyCount = userPreferenceService.updateUserPreference(userId, preferenceUpdateDTO);
+        // 2. '분위기 키워드(place_mood)'가 요청에 포함된 경우에만 설문 횟수 업데이트 로직을 수행
+        if (request.getPlace_mood() != null && !request.getPlace_mood().isEmpty()) {
 
-        // 2. 설문 횟수가 10 이상인지 확인
-        if (surveyCount >= 10) {
-            // 3. 10 이상이면 사용자 유형 분석 로직을 호출
-            userPreferenceService.getUserType(userId);
+            UserPreferenceUpdateDTO preferenceUpdateDTO = new UserPreferenceUpdateDTO();
+            preferenceUpdateDTO.setSelectedCategories(request.getPlace_mood());
+
+            // 2-1. userPreferenceService를 호출하여 설문 횟수 업데이트
+            surveyCount = userPreferenceService.updateUserPreference(userId, preferenceUpdateDTO);
+
+            // 2-2. 설문 횟수가 10 이상이면 사용자 유형 분석 로직 호출
+            if (surveyCount >= 10) {
+                userPreferenceService.getUserType(userId);
+            }
         }
 
-        // 4. 설문 횟수를 컨트롤러로 반환
+        // 3. 설문 횟수를 컨트롤러로 반환
         return surveyCount;
     }
+
 
     //카테고리 매핑
     private String convertCategory(String category) {
